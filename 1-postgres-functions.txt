@@ -1,0 +1,115 @@
+current_catalog → name
+
+current_database () → name
+
+Returns the name of the current database. (Databases are called “catalogs” in the SQL standard, so current_catalog is the standard's spelling.)
+
+current_query () → text
+
+Returns the text of the currently executing query, as submitted by the client (which might contain more than one statement).
+
+current_role → name
+
+This is equivalent to current_user.
+
+current_schema → name
+
+current_schema () → name
+
+Returns the name of the schema that is first in the search path (or a null value if the search path is empty). This is the schema that will be used for any tables or other named objects that are created without specifying a target schema.
+
+current_schemas ( include_implicit boolean ) → name[]
+
+Returns an array of the names of all schemas presently in the effective search path, in their priority order. (Items in the current search_path setting that do not correspond to existing, searchable schemas are omitted.) If the Boolean argument is true, then implicitly-searched system schemas such as pg_catalog are included in the result.
+
+current_user → name
+
+Returns the user name of the current execution context.
+
+inet_client_addr () → inet
+
+Returns the IP address of the current client, or NULL if the current connection is via a Unix-domain socket.
+
+inet_client_port () → integer
+
+Returns the IP port number of the current client, or NULL if the current connection is via a Unix-domain socket.
+
+inet_server_addr () → inet
+
+Returns the IP address on which the server accepted the current connection, or NULL if the current connection is via a Unix-domain socket.
+
+inet_server_port () → integer
+
+Returns the IP port number on which the server accepted the current connection, or NULL if the current connection is via a Unix-domain socket.
+
+pg_backend_pid () → integer
+
+Returns the process ID of the server process attached to the current session.
+
+pg_blocking_pids ( integer ) → integer[]
+
+Returns an array of the process ID(s) of the sessions that are blocking the server process with the specified process ID from acquiring a lock, or an empty array if there is no such server process or it is not blocked.
+
+One server process blocks another if it either holds a lock that conflicts with the blocked process's lock request (hard block), or is waiting for a lock that would conflict with the blocked process's lock request and is ahead of it in the wait queue (soft block). When using parallel queries the result always lists client-visible process IDs (that is, pg_backend_pid results) even if the actual lock is held or awaited by a child worker process. As a result of that, there may be duplicated PIDs in the result. Also note that when a prepared transaction holds a conflicting lock, it will be represented by a zero process ID.
+
+Frequent calls to this function could have some impact on database performance, because it needs exclusive access to the lock manager's shared state for a short time.
+
+pg_conf_load_time () → timestamp with time zone
+
+Returns the time when the server configuration files were last loaded. If the current session was alive at the time, this will be the time when the session itself re-read the configuration files (so the reading will vary a little in different sessions). Otherwise it is the time when the postmaster process re-read the configuration files.
+
+pg_current_logfile ( [ text ] ) → text
+
+Returns the path name of the log file currently in use by the logging collector. The path includes the log_directory directory and the individual log file name. The result is NULL if the logging collector is disabled. When multiple log files exist, each in a different format, pg_current_logfile without an argument returns the path of the file having the first format found in the ordered list: stderr, csvlog, jsonlog. NULL is returned if no log file has any of these formats. To request information about a specific log file format, supply either csvlog, jsonlog or stderr as the value of the optional parameter. The result is NULL if the log format requested is not configured in log_destination. The result reflects the contents of the current_logfiles file.
+
+pg_my_temp_schema () → oid
+
+Returns the OID of the current session's temporary schema, or zero if it has none (because it has not created any temporary tables).
+
+pg_is_other_temp_schema ( oid ) → boolean
+
+Returns true if the given OID is the OID of another session's temporary schema. (This can be useful, for example, to exclude other sessions' temporary tables from a catalog display.)
+
+pg_jit_available () → boolean
+
+Returns true if a JIT compiler extension is available (see Chapter 32) and the jit configuration parameter is set to on.
+
+pg_listening_channels () → setof text
+
+Returns the set of names of asynchronous notification channels that the current session is listening to.
+
+pg_notification_queue_usage () → double precision
+
+Returns the fraction (0–1) of the asynchronous notification queue's maximum size that is currently occupied by notifications that are waiting to be processed. See LISTEN and NOTIFY for more information.
+
+pg_postmaster_start_time () → timestamp with time zone
+
+Returns the time when the server started.
+
+pg_safe_snapshot_blocking_pids ( integer ) → integer[]
+
+Returns an array of the process ID(s) of the sessions that are blocking the server process with the specified process ID from acquiring a safe snapshot, or an empty array if there is no such server process or it is not blocked.
+
+A session running a SERIALIZABLE transaction blocks a SERIALIZABLE READ ONLY DEFERRABLE transaction from acquiring a snapshot until the latter determines that it is safe to avoid taking any predicate locks. See Section 13.2.3 for more information about serializable and deferrable transactions.
+
+Frequent calls to this function could have some impact on database performance, because it needs access to the predicate lock manager's shared state for a short time.
+
+pg_trigger_depth () → integer
+
+Returns the current nesting level of PostgreSQL triggers (0 if not called, directly or indirectly, from inside a trigger).
+
+session_user → name
+
+Returns the session user's name.
+
+system_user → text
+
+Returns the authentication method and the identity (if any) that the user presented during the authentication cycle before they were assigned a database role. It is represented as auth_method:identity or NULL if the user has not been authenticated (for example if Trust authentication has been used).
+
+user → name
+
+This is equivalent to current_user.
+
+version () → text
+
+Returns a string describing the PostgreSQL server's version. You can also get this information from server_version, or for a machine-readable version use server_version_num. Software developers should use server_version_num (available since 8.2) or PQserverVersion instead of parsing the text version.

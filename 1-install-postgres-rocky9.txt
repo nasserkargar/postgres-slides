@@ -1,0 +1,7 @@
+# dnf install postgresql-server glibc-all-langpacks
+# postgresql-setup --initdb
+# systemctl start postgresql
+# sudo -i -u postgres
+# psql
+
+# createuser --interactive

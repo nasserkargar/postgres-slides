@@ -1,0 +1,2 @@
+psql>
+update pg_database set datcollate='POSIX.UTF-8', datctype='POSIX.UTF-8' where datname='databasename';

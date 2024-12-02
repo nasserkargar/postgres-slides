@@ -1,0 +1,40 @@
+master:
+-------
+# docker run -dit --name pg1 --net pg_net -p 5432:5432 -v pg1-data:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres postgres:latest
+# docker exec -it pg1 /bin/bash
+# cd /var/lib/postgresql
+# su - postgres
+# psql
+> CREATE USER replicator WITH REPLICATION ENCRYPTED PASSWORD 'postgres'; 
+>\q
+# echo "host replication replicator 172.18.0.3/32 md5" >> data/pg_hba.conf
+# psql -c "select pg_reload_conf();"
+
+
+
+slave:
+------
+# docker run -dit --name pg2 --net pg_net -p 5433:5432 -v pg2-data:/var/lib/postgresql/data -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres postgres:latest
+# docker exec -it pg2 /bin/bash
+# cd /var/lib/postgresql
+# cp -rp data data-orig
+# rm -rf data/*
+# pg_basebackup -h 172.18.0.2 -D ./data -U replicator -P -v -R -X stream
+# nano data/recovery.conf
+standby_mode='on'
+primary_conninfo = 'host=172.18.0.2 port=5432 user=replicator password=postgres'
+
+
+*** minitor  replication status ***
+#psql -c "\x" -c "SELECT * FROM pg_stat_wal_receiver;"
+
+
+***************************** validate replication
+on master:
+CREATE DATABASE test_replication;
+\c test_replication
+CREATE TABLE test_table (id serial primary key, value text);
+
+on slave:
+> \l
+

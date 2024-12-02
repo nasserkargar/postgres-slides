@@ -1,0 +1,71 @@
+docker pull postgres
+docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+docker run -it --rm --network some-network postgres psql -h some-postgres -U postgres
+
+Using Docker Compose
+--------------------
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+ 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+ 
+volumes:
+  pgdata:
+
+---------------------------
+services:
+  web:
+    build: .
+    ports:
+      - "80:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "app.py"]
+ 
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+ 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+------------------------------
+Environment variables
+
+We’ve touched briefly on the importance of POSTGRES_PASSWORD to Postgres. Without specifying this, Postgres can’t run effectively. But there are also other variables that influence container behavior: 
+
+    POSTGRES_USER – Specifies a user with superuser privileges and a database with the same name. Postgres uses the default user when this is empty.
+    POSTGRES_DB – Specifies a name for your database or defaults to the POSTGRES_USER value when left blank. 
+    POSTGRES_INITDB_ARGS – Sends arguments to postgres_initdb and adds functionality
+    POSTGRES_INITDB_WALDIR – Defines a specific directory for the Postgres transaction log. A transaction is an operation and usually describes a change to your database. 
+    POSTGRES_HOST_AUTH_METHOD – Controls the auth-method for host connections to all databases, users, and addresses
+    PGDATA – Defines another default location or subdirectory for database files
+--------------------------------
+Docker secrets
+docker run --name some-postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d postgres
+
+-----------------------------------
+Initialization scripts
+
+Also called init scripts, these run any executable shell scripts or command-based .sql files once Postgres creates a postgres-data folder. This helps you perform any critical operations before your services are fully up and running. Conversely, Postgres will ignore these scripts if the postgres-data folder initializes.
+-----------------------------------
